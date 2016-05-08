@@ -21,6 +21,7 @@ redisReply *reply;
 char* redisreturn;
 const char *redishostname = "127.0.0.1";
 int redisport = 6379;
+struct timeval timeout = { 1, 500000 }; // 1.5 seconds
 
 static void onLine(dyad_Event *e) {
 	char path[512];
@@ -77,7 +78,7 @@ int main(int argc, char *argv[] ) {
 	host = argv[2];
   }
 
-  c = redisConnect(redishostname, redisport);
+  c = redisConnectWithTimeout(redishostname, redisport, timeout);
   if (c == NULL || c->err) {
 	  printf ("Cannot connect to redis\n");
 	  exit(1);
