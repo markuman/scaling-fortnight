@@ -82,5 +82,6 @@ Otherwise the new elements will be used until they reached the score of the lowe
 * set individual redis connection
 * add simple api/cli to re-scale endpoints
 * magic-detection when an endpoint is gone? how?
+* test/fix/finish docker branch
 
     
