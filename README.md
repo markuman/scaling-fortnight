@@ -31,6 +31,20 @@ There are two arguments.
 		
 Currently you cannot change the redis connection details. It will connect to `127.0.0.1:6379`
 
+### docker
+
+
+First, run redis somehwere, somehow ... for example
+
+		docker run -p 6379:6379 -d --name redis redis:alpine
+		
+Start `scaling-fortnight` and link redis into it.
+
+!! something is still broken here ...maybe with musl?
+
+		docker run -p 8000:8000 --name scaling-fortnight --link redis:redis -d markuman/scaling-fortnight
+		
+
 #### test
 
 A single `pyhton2 -m SimpleHTTPServer` reached ~300 tans/sec on my i5 mobile
