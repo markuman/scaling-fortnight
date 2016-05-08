@@ -21,22 +21,15 @@ redisReply *reply;
 char* redisreturn;
 const char *redishostname = "127.0.0.1";
 int redisport = 6379;
-struct timeval timeout = { 1, 500000 }; // 1.5 seconds
 
 static void onLine(dyad_Event *e) {
-	char path[2000];
+	char path[512];
 
 	if (sscanf(e->data, "GET %127s", path) == 1) {
 	
 		// when the redis connection failed -> error 503
 		if (c == NULL || c->err) {
 			dyad_writef(e->stream, "HTTP/1.1 503 Service Unavailable\r\n\r\n");
-			if (c) {
-				redisFree(c);
-				dyad_end(e->stream);
-			} else {
-				dyad_end(e->stream);
-			}
 		} else {
 			reply = (redisReply*)redisCommand(c, "ZRANGE ENDPOINT 0 0");
 			// when redis doesn't replyed with an array -> error 503
@@ -84,7 +77,11 @@ int main(int argc, char *argv[] ) {
 	host = argv[2];
   }
 
-  c = redisConnectWithTimeout(redishostname, redisport, timeout);
+  c = redisConnect(redishostname, redisport);
+  if (c == NULL || c->err) {
+	  printf ("Cannot connect to redis\n");
+	  exit(1);
+  }
 
   dyad_Stream *s;
   dyad_init();
