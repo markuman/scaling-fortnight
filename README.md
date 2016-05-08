@@ -70,7 +70,7 @@ So you can up/down/rescale live without restart `scaling-fortnight`.
 
 But take care:  
 When you initialize a number of endpoints, you can add all with value 0.  
-But when you re-scaling and append new endpoints, you have to  
+But when you're re-scaling and appending new endpoints, you have to  
 
 * use the value of the lowest existing element (endpoint) `ZRANGE ENDPOINT 0 0 withscores`
 * or reset all element values to zero  
