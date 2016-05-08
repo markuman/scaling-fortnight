@@ -65,7 +65,7 @@ the server returns the redirect response `303 See Other`. The client recognizes 
 ### Redis?
 
 Endpoints are stored in a sorted list named `ENDPOINT`.  
-`scaling-fortnight` takes with every request the element with the lowest value, increase this value by 1 and use the element as redirect location.  
+`scaling-fortnight` takes in every request the element with the lowest value, increase this value by 1 and use the element as redirect location.  
 So you can up/down/rescale live without restart `scaling-fortnight`.
 
 But take care:  
