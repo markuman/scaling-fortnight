@@ -5,7 +5,7 @@ Simple HTTP redirect-based load balancer with redis backings.
 
 ## Usage
 
-	git clone --recursivly https://github.com/markuman/scaling-fortnight
+	git clone --recursive https://github.com/markuman/scaling-fortnight
 	make build
 	
 without a whimper run `./sf` 
