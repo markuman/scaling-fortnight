@@ -25,11 +25,11 @@ Now setup some `endpoints` in Redis.
 
 ### configuration
 
-There are two arguments. 
+There is one arguments. 
 
-		sf <port> <host>
+		sf <configfile>
 		
-Currently you cannot change the redis connection details. It will connect to `127.0.0.1:6379`
+The `<configfile>` is a Lua file where you can define redis connection and `scaling-fortnight` host and port.
 
 ### docker
 
@@ -38,11 +38,13 @@ First, run redis somehwere, somehow ... for example
 
 		docker run -p 6379:6379 -d --name redis redis:alpine
 		
+Build docker image
+
+		docker build --tag sf .
+		
 Start `scaling-fortnight` and link redis into it.
 
-!! something is still broken here ...maybe with musl?
-
-		docker run -p 8000:8000 --name scaling-fortnight --link redis:redis -d markuman/scaling-fortnight
+		docker run -p 8000:8000 --name scaling-fortnight --link redis:redis -d sf
 		
 
 #### test
@@ -93,9 +95,11 @@ Otherwise the new elements will be used until they reached the score of the lowe
 
 # Todo
 
-* set individual redis connection
+* password and databasenumber for redis connection
 * add simple api/cli to re-scale endpoints
 * magic-detection when an endpoint is gone? how?
-* test/fix/finish docker branch
+* improve docker branch
+* check if redisContext is still valid
+* scriptable background/watch process in Lua
 
     
