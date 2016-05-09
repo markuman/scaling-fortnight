@@ -1,16 +1,17 @@
-FROM alpine:latest
-RUN apk add --update git hiredis hiredis-dev perl musl-dev gcc\
+FROM ubuntu:16.04
+
+RUN apt update -y && \
+        apt install git libhiredis0.13 libhiredis-dev tcc -y \
         && cd /tmp \
         && git clone --recursive https://github.com/markuman/scaling-fortnight \
         && cd scaling-fortnight \
-        && gcc -Idyad/src/ -I/usr/include/hiredis/ -lhiredis dyad/src/dyad.c -O2 main.c -o /bin/sf
+        && tcc -Idyad/src/ -I/usr/include/hiredis/ -lhiredis dyad/src/dyad.c main.c -o /bin/sf \
+        && mkdir /config && cp config.lua /config/
 
-# maybe cleaning up get better ...
-RUN apk del gcc git perl hiredis-dev musl-dev \
-        && rm -rf /var/cache/apk/* \
-        && rm -rf /tmp/scaling-fortnight
-
+RUN apt remove git tcc libhiredis-dev -y \
+        && apt-get autoremove -y \
+        && apt-get clean
 
 
 ENTRYPOINT ["./bin/sf"]
-CMD ["8000", "0.0.0.0"]
+CMD ["/config/config.lua"]
