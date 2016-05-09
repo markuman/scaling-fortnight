@@ -2,10 +2,10 @@ CC= gcc
 
 build: ## compile scaling-fortnight
 	@echo "comping scaling-fortnight"
-	@$(CC) dyad/src/dyad.c -lhiredis -llua -O2 main.c -o sf
+	@$(CC) -pthread dyad/src/dyad.c -lhiredis -llua -O2 main.c -o sf
 
 live: ## run live from source with tcc
-	@tcc -lhiredis -llua dyad/src/dyad.c -run main.c
+	@tcc -pthread -lhiredis -llua dyad/src/dyad.c -run main.c
 
 
 .PHONY: help

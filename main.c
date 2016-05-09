@@ -6,6 +6,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <pthread.h>
 #include "dyad/src/dyad.h"
 
 // default connections
@@ -19,11 +20,44 @@ redisContext *c;
 redisReply *reply;
 char* redisreturn;
 
+pthread_t thread_handle;
 const char* configfile = "config.lua";
+long int count = 0;
+long int NumberOfRequests = 0;
+
+void *luaThread() {
+	lua_State* LT = luaL_newstate();
+	luaL_openlibs(LT);
+	if( luaL_loadfile(LT, "watch.lua") || lua_pcall(LT, 0, 0, 0) ) {
+		return NULL;
+	}
+	lua_getglobal(LT, "redishost");
+	lua_getglobal(LT, "watch");
+	lua_pcall(LT, 0, 0, 0) ;
+	lua_close(LT);
+	return NULL;
+}
+
+int watch() {
+	if (NumberOfRequests > 0) {
+		count++;
+		if ((count % NumberOfRequests) == 0) {
+			count = 0;
+			if(pthread_create(&thread_handle, NULL, luaThread, NULL)) {
+				fprintf(stderr, "Error creating thread\n");
+				return 1;
+			}
+			pthread_detach(thread_handle);	
+		}
+	}
+	return 0;
+}
+
 
 static void onLine(dyad_Event *e) {
 	char path[512];
 	if (sscanf(e->data, "GET %127s", path) == 1) {
+		watch();
 		reply = (redisReply*)redisCommand(c, "ZRANGE ENDPOINT 0 0");
 		// when the redis connection failed -> error 503
 		if (reply != NULL) {
@@ -71,14 +105,25 @@ int luaConfig() {
 	}
 
 	lua_getglobal(L, "redishost");
+	redishostname = lua_tostring(L, -1);
+	lua_pop(L, lua_gettop(L));
+	
 	lua_getglobal(L, "redisport");
+	redisport = lua_tointeger(L, -1);
+	lua_pop(L, lua_gettop(L));
+	
 	lua_getglobal(L, "sfhost");
+	host = lua_tostring(L, -1);
+	lua_pop(L, lua_gettop(L));
+	
 	lua_getglobal(L, "sfport");
-  
-	redishostname = lua_tostring(L, -4);
-	redisport = lua_tointeger(L, -3);
-	host = lua_tostring(L, -2);
 	port = lua_tointeger(L, -1);
+	lua_pop(L, lua_gettop(L));
+	
+	lua_getglobal(L, "NumberOfRequests");
+	NumberOfRequests = lua_tointeger(L, -1);
+	lua_pop(L, lua_gettop(L));
+
 	printf("Using Redis Host: %s\n", redishostname);
 	printf("Using Redis Port: %d\n", redisport);
 
