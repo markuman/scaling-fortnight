@@ -1,7 +1,13 @@
-build: ## compile scaling-fortnight
-	@echo "comping scaling-fortnight"
-	@gcc -Idyad/src/ -I/usr/include/hiredis/ -lhiredis dyad/src/dyad.c -O2 main.c -o sf
+# gcc, clang or tcc should all work
+CC= gcc
+HIREDIS= /usr/include/hiredis/
 
+build: ## compile scaling-fortnight – options=default: CC=gcc, HIREDIS=/usr/include/hiredis/
+	@echo "comping scaling-fortnight"
+	@$(CC) -Idyad/src/ -I $(HIREDIS) -lhiredis -llua dyad/src/dyad.c -O2 main.c -o sf
+
+live: ## run live from source with tcc
+	@tcc -Idyad/src/ -I /usr/include/hiredis/ -lhiredis -llua dyad/src/dyad.c -run main.c
 
 .PHONY: help
 
