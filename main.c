@@ -98,7 +98,7 @@ int luaConfig() {
 	// using lua for config file
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
-	
+
 	if( luaL_loadfile(L, configfile) || lua_pcall(L, 0, 0, 0) ) {
 		printf("Failed to load config %s\n", configfile);
 		return 1;
@@ -124,11 +124,6 @@ int luaConfig() {
 	NumberOfRequests = lua_tointeger(L, -1);
 	lua_pop(L, lua_gettop(L));
 
-	printf("Using Redis Host: %s\n", redishostname);
-	printf("Using Redis Port: %d\n", redisport);
-
-	lua_close(L);
-	
 	return 0;
 }
 
@@ -147,6 +142,8 @@ int main(int argc, char *argv[] ) {
 		printf("Failed to load config.lua\n");
 	}
 
+	printf("Using Redis Host: %s\n", redishostname);
+	printf("Using Redis Port: %d\n", redisport);
 	c = redisConnect(redishostname, redisport);
 	if (c == NULL || c->err) {
 		printf ("Cannot connect to redis\n");
