@@ -2,16 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+// redis lib include
 #include <hiredis/hiredis.h>
+// lua includes. used for config and background processing
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+// to run lua background process
 #include <pthread.h>
+// asynchronous networking lib
 #include "dyad/src/dyad.h"
 
 // default connections
 const char* host = "127.0.0.1";
 int port = 8000;
+// default redis connections
 const char *redishostname = "127.0.0.1";
 int redisport = 6379;
 
@@ -22,8 +27,8 @@ char* redisreturn;
 
 pthread_t thread_handle;
 const char* configfile = "config.lua";
-long int count = 0;
-long int NumberOfRequests = 0;
+unsigned long int count = 0;
+unsigned long int NumberOfRequests = 0;
 
 void *luaThread() {
 	lua_State* LT = luaL_newstate();
