@@ -7,7 +7,7 @@ Simple HTTP redirect-based load balancer with redis backings.
 
 	git clone --recursive https://github.com/markuman/scaling-fortnight
 	make build
-	
+
 without a whimper run `./sf` 
 
 Now setup some `endpoints` in Redis.
@@ -28,7 +28,7 @@ Now setup some `endpoints` in Redis.
 There is one arguments. 
 
 		sf <configfile>
-		
+
 The `<configfile>` is a Lua file where you can define redis connection and `scaling-fortnight` host and port.
 
 ### docker
@@ -37,15 +37,15 @@ The `<configfile>` is a Lua file where you can define redis connection and `scal
 First, run redis somehwere, somehow ... for example
 
 		docker run -p 6379:6379 -d --name redis redis:alpine
-		
+
 Build docker image
 
 		docker build --tag sf .
-		
+
 Start `scaling-fortnight` and link redis into it.
 
 		docker run -p 8000:8000 --name scaling-fortnight --link redis:redis -d sf
-		
+​		
 
 #### test
 
@@ -55,7 +55,7 @@ A single `pyhton2 -m SimpleHTTPServer` reached ~300 tans/sec on my i5 mobile
 		...
 		Transaction rate:	      299.52 trans/sec
 		...
-		
+
 With `scaling-fortnight` in front of 5 `python2` Servers
 
 		siege -r 200 -c 200  http://127.0.0.1:8000/index.html
@@ -63,7 +63,7 @@ With `scaling-fortnight` in front of 5 `python2` Servers
 		Transaction rate:	     1556.99 trans/sec
 		...
 
-		
+​		
 
 # FAQ
 
@@ -90,7 +90,7 @@ But when you're re-scaling and appending new endpoints, you have to
 
 * use the value of the lowest existing element (endpoint) `ZRANGE ENDPOINT 0 0 withscores`
 * or reset all element values to zero  
-    
+
 Otherwise the new elements will be used until they reached the score of the lowest existing endpoint. 
 
 # Todo
@@ -102,4 +102,11 @@ Otherwise the new elements will be used until they reached the score of the lowe
 * check if redisContext is still valid
 * scriptable background/watch process in Lua
 
-    
+
+
+
+# cors
+
+> If the response has an HTTP status code of 301, 302, 303, 307, or 308 Apply the cache and network error steps.
+
+Currently it is not supported by browsers
