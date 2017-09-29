@@ -13,12 +13,18 @@
 // asynchronous networking lib
 #include "dyad/src/dyad.h"
 
+
 // default connections
 const char* host = "127.0.0.1";
 int port = 8000;
 // default redis connections
 const char *redishostname = "127.0.0.1";
 int redisport = 6379;
+// use cors
+int use_cors = 0;
+const char* origin = "*";
+const char* methods = "GET, POST, PUT, OPTIONS";
+const char* headers = "Content-Type";
 
 // redis stuff
 redisContext *c;
@@ -61,7 +67,24 @@ int watch() {
 
 static void onLine(dyad_Event *e) {
 	char path[512];
-	if (sscanf(e->data, "GET %127s", path) == 1) {
+	printf("%s\n\n", e->data);
+
+	if (use_cors == 0) {
+		if (strstr(e->data, "OPTIONS") != NULL) {
+			printf("reply with cors header now\n");
+			dyad_writef(e->stream, "HTTP/1.1 204 No Content\r\n");
+			dyad_writef(e->stream, "Access-Control-Allow-Origin: %s\r\n", origin);
+			dyad_writef(e->stream, "Access-Control-Allow-Methods: %s\r\n", methods);
+			dyad_writef(e->stream, "Access-Control-Allow-Headers: %s\r\n", headers);
+			dyad_writef(e->stream, "Content-Length: 0\r\n");
+			dyad_writef(e->stream, "Connection: keep-alive\r\n\r\n");
+			dyad_end(e->stream);
+			return;
+		}
+	}
+	
+	if ((sscanf(e->data, "GET %127s", path) == 1) || (sscanf(e->data, "POST %127s", path) == 1) || (sscanf(e->data, "OPTIONS %127s", path) == 1)) {
+		printf("yes\n");
 		watch();
 		reply = (redisReply*)redisCommand(c, "ZRANGE ENDPOINT 0 0");
 		// when the redis connection failed -> error 503
@@ -73,7 +96,14 @@ static void onLine(dyad_Event *e) {
 				// now we're increasing the lowest element by 1
 				reply = (redisReply*)redisCommand(c, "ZINCRBY ENDPOINT 1 %s", redisreturn);
 				// use http code 303 for redirect
-				dyad_writef(e->stream, "HTTP/1.1 303 See Other\r\nLocation: %s%s\r\n\r\n", redisreturn, path);
+				dyad_writef(e->stream, "HTTP/1.1 307 Temporary Redirect\r\n");
+				dyad_writef(e->stream, "Access-Control-Allow-Origin: %s\r\n", origin);
+				//if (use_cors == 1) {
+				//	dyad_writef(e->stream, "Access-Control-Allow-Origin: %s\r\n", origin);
+				//	dyad_writef(e->stream, "Access-Control-Allow-Methods: %s\r\n", methods);
+				//	dyad_writef(e->stream, "Access-Control-Allow-Headers: %s\r\n", headers);
+				//}
+				dyad_writef(e->stream, "Location: %s%s\r\n\r\n", redisreturn, path);
 				dyad_writef(e->stream, redisreturn );
 				dyad_end(e->stream);
 				return;	
@@ -127,6 +157,10 @@ int luaConfig() {
 	
 	lua_getglobal(L, "NumberOfRequests");
 	NumberOfRequests = lua_tointeger(L, -1);
+	lua_pop(L, lua_gettop(L));
+	
+	lua_getglobal(L, "use_cors");
+	use_cors = lua_tointeger(L, -1);
 	lua_pop(L, lua_gettop(L));
 
 	return 0;
