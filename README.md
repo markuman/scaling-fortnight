@@ -1,1 +1,1 @@
-bye bye microsoft. please visit https://git.osuv.de/m/markuman/scaling-fortnight
+bye bye microsoft. please visit https://git.osuv.de/m/scaling-fortnight
